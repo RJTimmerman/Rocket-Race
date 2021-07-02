@@ -6,18 +6,25 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     public bool taken = false;
-    public enum TileColour { Red, Blue, Green, Yellow, Orange, Purple, Brown, Safe }
+    public enum TileColour { Red, Blue, Green, Yellow, Orange, Purple, Brown, Safe, Rocket }
     public TileColour colour;
     public bool halt = false;
     public Tile[] nextTiles;
     public bool clickable = false;
 
     private ParticleSystem highlight;
+    private ParticleSystem puff;
 
 
     private void Awake()
     {
-        highlight = GetComponentInChildren<ParticleSystem>();
+        highlight = transform.Find("Selectable Particles").GetComponent<ParticleSystem>();
+        if (colour != TileColour.Safe) puff = transform.Find("Ejection Particles").GetComponent<ParticleSystem>();
+    }
+
+    private void Start()
+    {
+        LaunchButton.OnTileEject += EjectPressed;
     }
 
     public void Highlight()
@@ -38,5 +45,10 @@ public class Tile : MonoBehaviour
         if (!clickable) return;
 
         OnTileSelected?.Invoke(this);
+    }
+
+    private void EjectPressed(TileColour tileColour)
+    {
+        if (colour == tileColour && (LaunchButton.doEmptyTileParticles || taken)) puff.Play();
     }
 }

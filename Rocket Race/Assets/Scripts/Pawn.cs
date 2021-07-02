@@ -107,6 +107,7 @@ public class Pawn : MonoBehaviour
         rb.isKinematic = true;
         transform.position = startPos;
         transform.rotation = startRot;
+        currentTile.taken = false;
         currentTile = tileZero;
         lastTile = tileZero;
     }

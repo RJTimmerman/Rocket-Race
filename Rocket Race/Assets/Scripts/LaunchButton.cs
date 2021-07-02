@@ -5,15 +5,21 @@ using UnityEngine;
 
 public class LaunchButton : MonoBehaviour
 {
-    public Tile.TileColour colour;
-    public bool rocket;
-    
+    [SerializeField] private Tile.TileColour colour;
 
+    public static bool doEmptyTileParticles;
+    [SerializeField] private bool puffEmptyTiles;
+
+
+    private void OnValidate()
+    {
+        doEmptyTileParticles = puffEmptyTiles;
+    }
+    
     public static event Action<Tile.TileColour> OnTileEject;
     private void OnMouseDown()
     {
-        if (rocket) LaunchRocket();
-        else OnTileEject?.Invoke(colour);
+        OnTileEject?.Invoke(colour);
     }
 
     private void LaunchRocket()
