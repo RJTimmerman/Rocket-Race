@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.57481706, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -160,6 +160,10 @@ PrefabInstance:
     - target: {fileID: 861723433176476030, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
       propertyPath: m_Name
       value: Safe Tile 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3837460041300866471, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
+      propertyPath: colour
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3837460041300866471, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
       propertyPath: nextTiles.Array.data[0]
@@ -847,6 +851,10 @@ PrefabInstance:
     - target: {fileID: 861723433176476030, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
       propertyPath: m_Name
       value: Safe Tile 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3837460041300866471, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
+      propertyPath: colour
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3837460041300866471, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
       propertyPath: nextTiles.Array.data[0]
@@ -1674,15 +1682,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 570843740128409154, guid: 87f31760a7ee3094bab05668220e8e98, type: 3}
       propertyPath: colour.b
-      value: 0.3254717
+      value: 0.5527881
       objectReference: {fileID: 0}
     - target: {fileID: 570843740128409154, guid: 87f31760a7ee3094bab05668220e8e98, type: 3}
       propertyPath: colour.g
-      value: 1
+      value: 0.32549024
       objectReference: {fileID: 0}
     - target: {fileID: 570843740128409154, guid: 87f31760a7ee3094bab05668220e8e98, type: 3}
       propertyPath: colour.r
-      value: 0.38398835
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 570843740128409154, guid: 87f31760a7ee3094bab05668220e8e98, type: 3}
       propertyPath: currentTile
@@ -2213,6 +2221,10 @@ PrefabInstance:
     - target: {fileID: 861723433176476030, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
       propertyPath: m_Name
       value: Safe Tile 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3837460041300866471, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
+      propertyPath: colour
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3837460041300866471, guid: 455136ff236088e45a94ae02e88a8138, type: 3}
       propertyPath: nextTiles.Array.size
@@ -2829,6 +2841,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7551524239058638909, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}
+      propertyPath: colour
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7551524239058638909, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}
       propertyPath: nextTiles.Array.data[0]
       value: 
       objectReference: {fileID: 1584715778}
@@ -2838,7 +2854,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8064770377298674245, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}

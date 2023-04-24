@@ -16,7 +16,7 @@ public class Pawn : MonoBehaviour
     private Rigidbody rb;
     private Tile tileZero;
 
-    private Vector3 startPos;
+    private Vector3 beginPos;
     private Quaternion startRot;
 
     
@@ -36,7 +36,7 @@ public class Pawn : MonoBehaviour
         currentTile = tileZero;
         lastTile = tileZero;
 
-        startPos = transform.position;
+        beginPos = transform.position;
         startRot = transform.rotation;
     }
 
@@ -49,27 +49,44 @@ public class Pawn : MonoBehaviour
     public static event Action OnHaltingTile;
     public IEnumerator Move()
     {
-        if (currentTile.nextTiles.Length == 1) nextTile = currentTile.nextTiles[0];
-        else
-        {
-            foreach (Tile tile in currentTile.nextTiles) if (!tile.taken && tile != lastTile) tile.Highlight();
+        List<Tile> options = new List<Tile>(currentTile.nextTiles.Length);
+        foreach (Tile option in currentTile.nextTiles)
+            if (!option.taken && option != lastTile)
+                options.Add(option);
 
-            yield return new WaitWhile(() => nextTile is null);
+        switch (options.Count)
+        {
+            case 0:
+                throw new Exception("No valid tiles to move to!");
+                // break;
+            case 1:
+                nextTile = options[0];
+                break;
+            default:
+                foreach (Tile tile in options)
+                    tile.Highlight();
+
+                yield return new WaitWhile(() => nextTile is null);
             
-            foreach (Tile tile in currentTile.nextTiles) tile.Unhighlight();
+                foreach (Tile tile in options)
+                    tile.Unhighlight();
+                break;
         }
         
-        yield return StartCoroutine( MoveTo(transform.position + new Vector3(0, 4, 0), 0.5f) );
-        yield return StartCoroutine( MoveTo(nextTile.transform.position + new Vector3(0, 4.15f, 0), 1) );
-        yield return StartCoroutine( MoveTo(nextTile.transform.position + new Vector3(0, 0.15f, 0), 1) );
+        // yield return StartCoroutine( MoveTo(transform.position + new Vector3(0, 4, 0), 0.5f) );
+        // yield return StartCoroutine( MoveTo(nextTile.transform.position + new Vector3(0, 4.15f, 0), 1) );
+        // yield return StartCoroutine( MoveTo(nextTile.transform.position + new Vector3(0, 0.15f, 0), 1) );
 
         lastTile = currentTile;
         currentTile = nextTile;
         nextTile = null;
         lastTile.taken = false;
         currentTile.taken = true;
+
+        yield return MoveToTile();
         
-        if (currentTile.halt) OnHaltingTile?.Invoke();
+        if (currentTile.halt)
+            OnHaltingTile?.Invoke();
     }
 
     private IEnumerator MoveTo(Vector3 targetPos, float duration)
@@ -81,6 +98,24 @@ public class Pawn : MonoBehaviour
         {
             timePassed += Time.deltaTime;
             transform.Translate(direction / duration * Time.deltaTime);
+            yield return null;
+        }
+        transform.position = targetPos;
+    }
+
+    private IEnumerator MoveToTile()
+    {
+        float duration = 1;
+        float timePassed = 0;
+        const float a = -4;
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = currentTile.transform.position;
+        
+        while(timePassed < duration)
+        {
+            timePassed += Time.deltaTime;
+            transform.position = startPos + timePassed * (targetPos - startPos);
+            transform.Translate(0, a * timePassed * (timePassed - duration), 0);
             yield return null;
         }
         transform.position = targetPos;
@@ -105,7 +140,7 @@ public class Pawn : MonoBehaviour
         yield return new WaitForSeconds(7);
 
         rb.isKinematic = true;
-        transform.position = startPos;
+        transform.position = beginPos;
         transform.rotation = startRot;
         currentTile.taken = false;
         currentTile = tileZero;

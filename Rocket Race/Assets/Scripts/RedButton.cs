@@ -44,7 +44,9 @@ public class RedButton : MonoBehaviour
     private IEnumerator PlayTurn()
     {
         int steps = GetSteps();
-        for (int step = 0; step < steps; step++) if(!halted) yield return StartCoroutine( currentPlayer.Move() );
+        for (int step = 0; step < steps; step++)
+            if(!halted)
+                yield return StartCoroutine( currentPlayer.Move() );
 
         currentPlayerID++;
         if (currentPlayerID == players.Length) currentPlayerID = 0;

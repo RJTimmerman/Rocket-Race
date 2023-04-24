@@ -1,25 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
     public bool taken = false;
-    public enum TileColour { Red, Blue, Green, Yellow, Orange, Purple, Brown, Safe, Rocket }
+    public enum TileColour { Red, Blue, Green, Yellow, Orange, Purple, Safe, Rocket, Start }
     public TileColour colour;
     public bool halt = false;
     public Tile[] nextTiles;
     public bool clickable = false;
 
-    private ParticleSystem highlight;
-    private ParticleSystem puff;
+    [CanBeNull] private ParticleSystem highlight;
+    [CanBeNull] private ParticleSystem puff;
 
 
     private void Awake()
     {
-        highlight = transform.Find("Selectable Particles").GetComponent<ParticleSystem>();
-        if (colour != TileColour.Safe) puff = transform.Find("Ejection Particles").GetComponent<ParticleSystem>();
+        if (colour != TileColour.Start)
+            highlight = transform.Find("Selectable Particles").GetComponent<ParticleSystem>();
+        if (colour != TileColour.Safe && colour != TileColour.Start)
+            puff = transform.Find("Ejection Particles").GetComponent<ParticleSystem>();
     }
 
     private void Start()
@@ -30,13 +33,13 @@ public class Tile : MonoBehaviour
     public void Highlight()
     {
         clickable = true;
-        highlight.Play();
+        highlight?.Play();
     }
 
     public void Unhighlight()
     {
         clickable = false;
-        highlight.Stop();
+        highlight?.Stop();
     }
 
     public static event Action<Tile> OnTileSelected; 
@@ -49,6 +52,7 @@ public class Tile : MonoBehaviour
 
     private void EjectPressed(TileColour tileColour)
     {
-        if (colour == tileColour && (LaunchButton.doEmptyTileParticles || taken)) puff.Play();
+        if (colour == tileColour && (LaunchButton.doEmptyTileParticles || taken))
+            puff?.Play();
     }
 }
