@@ -1401,6 +1401,10 @@ PrefabInstance:
       value: Red Button
       objectReference: {fileID: 0}
     - target: {fileID: 4321921697592087399, guid: 7a32d69b178424245912f20fb2b39859, type: 3}
+      propertyPath: requireExactEnding
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4321921697592087399, guid: 7a32d69b178424245912f20fb2b39859, type: 3}
       propertyPath: players.Array.data[0]
       value: 
       objectReference: {fileID: 2102787987}
@@ -2723,8 +2727,7 @@ MonoBehaviour:
   taken: 0
   colour: 7
   halt: 0
-  nextTiles:
-  - {fileID: 0}
+  nextTiles: []
   prevTiles: []
   clickable: 0
 --- !u!1 &2559260502398463940
@@ -2836,6 +2839,10 @@ PrefabInstance:
     - target: {fileID: 5841882442377945909, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7551524239058638909, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}
+      propertyPath: halt
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7551524239058638909, guid: 9724684a3cc40384b850983e6b33fc79, type: 3}
       propertyPath: colour

@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using UnityEngine.UI;
 using TMPro;
 
 public class RedButton : MonoBehaviour
@@ -15,7 +15,7 @@ public class RedButton : MonoBehaviour
     [SerializeField] [Min(1)] private int minSteps = 1;
     [SerializeField] [Min(1)] private int maxSteps = 6;
     [SerializeField] private bool doMax = false;  // For testing purposes
-    [SerializeField] private bool requireExactEnding = false;  // Otherwise bounce back from the rocket
+    [SerializeField] private bool requireExactEnding = false;  // Then bounce back from the rocket
 
     private bool active = true;
 
@@ -26,7 +26,8 @@ public class RedButton : MonoBehaviour
     {
         stepsNumber = GameObject.Find("Steps Number").GetComponent<TextMeshProUGUI>();
 
-        SetAllPrevTiles();
+        if (requireExactEnding)
+            SetAllPrevTiles();
     }
 
     private void Start()
@@ -61,8 +62,24 @@ public class RedButton : MonoBehaviour
         return steps;
     }
 
-    private void SetAllPrevTiles()
+    private static void SetAllPrevTiles()
     {
-        throw new NotImplementedException("Trying to set all previous tile arrays.");
+        Tile tileZero = GameObject.Find("Starting Spot").GetComponent<Tile>();
+
+        void SetPrevTiles(Tile tile)
+        {
+            foreach (Tile nextTile in tile.nextTiles)
+            {
+                if (nextTile.prevTiles.Length == 0)
+                {
+                    nextTile.prevTiles = new Tile[] { tile };
+                    SetPrevTiles(nextTile);
+                }
+                else  // This isn't generally good performance-wise, but as most tiles should only have 1 prevTile, it is probably better than some alternatives
+                    nextTile.prevTiles = nextTile.prevTiles.Append(tile).ToArray();
+            }
+        }
+        
+        SetPrevTiles(tileZero);
     }
 }

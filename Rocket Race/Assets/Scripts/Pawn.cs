@@ -103,8 +103,6 @@ public class Pawn : MonoBehaviour
             nextTile = null;
             lastTile.taken = false;
             currentTile.taken = true;
-            if (currentTile.colour == Tile.TileColour.Safe)
-                lastTile = null;  // So leaving the safe spot to the tile you came from is accepted
 
             if (currentTile.halt)
                 break;
@@ -114,9 +112,14 @@ public class Pawn : MonoBehaviour
                 if (!exactEnding || step >= steps)
                     yield return Win();
                 else
+                {
                     reversed = true;
+                    lastTile = null;
+                }
             }
         }
+
+        lastTile = null;
     }
 
     private IEnumerator MoveToNextTile()
@@ -202,11 +205,10 @@ public class Pawn : MonoBehaviour
             nextTile = tile;
     }
 
-    private void EjectPressed(Tile.TileColour tileColour)
+    private void EjectPressed(Tile.TileColour tileColour, bool _)
     {
-        if (currentTile.colour != tileColour)
-            return;
-        StartCoroutine( GetEjected() );
+        if (currentTile.colour == tileColour)
+            StartCoroutine( GetEjected() );
     }
 
     private IEnumerator GetEjected()

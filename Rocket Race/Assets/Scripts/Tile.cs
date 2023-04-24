@@ -11,7 +11,7 @@ public class Tile : MonoBehaviour
     public TileColour colour;
     public bool halt = false;
     public Tile[] nextTiles;
-    [HideInInspector] public Tile[] prevTiles;  // For bouncing back, created based on nextTiles (if required)
+    [HideInInspector] public Tile[] prevTiles = Array.Empty<Tile>();  // For bouncing back, created based on nextTiles (if required)  // I believe Unity already makes this an empty array, so I made it explicit and assume non-nullity in SetPrevTiles
     public bool clickable = false;
     private List<Tile> currentPath;
 
@@ -21,9 +21,9 @@ public class Tile : MonoBehaviour
 
     private void Awake()
     {
-        if (colour != TileColour.Start)
+        if (colour != TileColour.Start && colour != TileColour.Rocket)
             highlight = transform.Find("Selectable Particles").GetComponent<ParticleSystem>();
-        if (colour != TileColour.Safe && colour != TileColour.Start)
+        if (colour != TileColour.Start && colour != TileColour.Rocket && colour != TileColour.Safe)
             puff = transform.Find("Ejection Particles").GetComponent<ParticleSystem>();
     }
 
@@ -54,9 +54,9 @@ public class Tile : MonoBehaviour
         OnTileSelected?.Invoke(currentPath);
     }
 
-    private void EjectPressed(TileColour tileColour)
+    private void EjectPressed(TileColour tileColour, bool puffEmptyTiles)
     {
-        if (colour == tileColour && (LaunchButton.doEmptyTileParticles || taken))
+        if (colour == tileColour && (puffEmptyTiles || taken))
             puff?.Play();
     }
 }

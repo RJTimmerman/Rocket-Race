@@ -9,14 +9,11 @@ public class LaunchButton : MonoBehaviour
     private MeshRenderer colourIndicator;
     private MaterialPropertyBlock mpBlock;
 
-    public static bool doEmptyTileParticles;
     [SerializeField] private bool puffEmptyTiles;
 
 
     private void OnValidate()
     {
-        doEmptyTileParticles = puffEmptyTiles;
-        
         colourIndicator = transform.Find("Colour Indicator").GetComponent<MeshRenderer>();
         mpBlock = new MaterialPropertyBlock();
         
@@ -28,10 +25,11 @@ public class LaunchButton : MonoBehaviour
     {
     }
     
-    public static event Action<Tile.TileColour> OnTileEject;
+    public static event Action<Tile.TileColour, bool> OnTileEject;
     private void OnMouseDown()
     {
-        OnTileEject?.Invoke(colour);
+        // Currently always active
+        OnTileEject?.Invoke(colour, puffEmptyTiles);
     }
 
     private void LaunchRocket()
