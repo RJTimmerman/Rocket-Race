@@ -1401,10 +1401,6 @@ PrefabInstance:
       value: Red Button
       objectReference: {fileID: 0}
     - target: {fileID: 4321921697592087399, guid: 7a32d69b178424245912f20fb2b39859, type: 3}
-      propertyPath: maxSteps
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 4321921697592087399, guid: 7a32d69b178424245912f20fb2b39859, type: 3}
       propertyPath: players.Array.data[0]
       value: 
       objectReference: {fileID: 2102787987}
@@ -2726,9 +2722,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   taken: 0
   colour: 7
-  halt: 1
+  halt: 0
   nextTiles:
   - {fileID: 0}
+  prevTiles: []
   clickable: 0
 --- !u!1 &2559260502398463940
 GameObject:
@@ -2750,7 +2747,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!33 &5363780812902884632
 MeshFilter:
   m_ObjectHideFlags: 0

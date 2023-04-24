@@ -14,9 +14,10 @@ public class RedButton : MonoBehaviour
 
     [SerializeField] [Min(1)] private int minSteps = 1;
     [SerializeField] [Min(1)] private int maxSteps = 6;
+    [SerializeField] private bool doMax = false;  // For testing purposes
+    [SerializeField] private bool requireExactEnding = false;  // Otherwise bounce back from the rocket
 
     private bool active = true;
-    private bool halted = false;
 
     private TextMeshProUGUI stepsNumber;
 
@@ -24,18 +25,19 @@ public class RedButton : MonoBehaviour
     private void Awake()
     {
         stepsNumber = GameObject.Find("Steps Number").GetComponent<TextMeshProUGUI>();
+
+        SetAllPrevTiles();
     }
 
     private void Start()
     {
-        Pawn.OnHaltingTile += HaltTurn;
-        
-        currentPlayer = players[currentPlayerID];
+        (currentPlayer = players[currentPlayerID]).inPlay = true;
     }
 
     private void OnMouseDown()
     {
-        if (!active) return;
+        if (!active)
+            return;
         active = false;
 
         StartCoroutine( PlayTurn() );
@@ -43,27 +45,24 @@ public class RedButton : MonoBehaviour
 
     private IEnumerator PlayTurn()
     {
-        int steps = GetSteps();
-        for (int step = 0; step < steps; step++)
-            if(!halted)
-                yield return StartCoroutine( currentPlayer.Move() );
+        yield return StartCoroutine( currentPlayer.Move(GetSteps(), requireExactEnding) );
 
-        currentPlayerID++;
-        if (currentPlayerID == players.Length) currentPlayerID = 0;
-        currentPlayer = players[currentPlayerID];
-        active = true; halted = false;
+        currentPlayer.inPlay = false;
+        if (++currentPlayerID == players.Length)
+            currentPlayerID = 0;
+        (currentPlayer = players[currentPlayerID]).inPlay = true;
+        active = true;
     }
-    private void HaltTurn() { halted = true; }
 
     private int GetSteps()
     {
-        int steps = Random.Range(minSteps, maxSteps + 1);
+        int steps = doMax ? maxSteps : Random.Range(minSteps, maxSteps + 1);
         stepsNumber.text = steps.ToString();
         return steps;
     }
 
-    private void OnDestroy()
+    private void SetAllPrevTiles()
     {
-        Pawn.OnHaltingTile -= HaltTurn;
+        throw new NotImplementedException("Trying to set all previous tile arrays.");
     }
 }

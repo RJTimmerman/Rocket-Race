@@ -1,18 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Pawn : MonoBehaviour
 {
     [SerializeField] private Color colour;
-    private const float moveDuration = 0.5f;
+    private const float moveDuration = 1;
     private const float overtakeHeight = 2.5f;
-    [HideInInspector] public bool inPlay = false;  // Only used to check if RegisterTileChoice should work
 
     private Tile currentTile;
-    private List<Tile> nextTile;
+    private LinkedList<Tile> nextTile;
     private Tile lastTile;  // This is being stored to make sure you cannot get back onto a safe spot you just came from
     private SkinnedMeshRenderer pawnRenderer;
     private MaterialPropertyBlock mpBlock;
@@ -48,49 +46,59 @@ public class Pawn : MonoBehaviour
         Tile.OnTileSelected += RegisterTileChoice;
         LaunchButton.OnTileEject += EjectPressed;
     }
-
-    public IEnumerator Move(int steps, bool exactEnding)
+    
+    public IEnumerator Move(int steps)
     {
-        bool reversed = false;  // To bounce back from the rocket if an exact ending is required
-        
         for (int step = 0; step < steps; )
         {
-            List<List<Tile>> options = new List<List<Tile>>();  // Can't easily copy LinkedList for new paths :(
-            HashSet<Tile> checkedTiles = new HashSet<Tile> { lastTile, currentTile };
+            List<LinkedList<Tile>> options = new List<LinkedList<Tile>>();
+            HashSet<Tile> checkedTiles = new HashSet<Tile> { lastTile };
 
-            void CheckStep(List<Tile> path, Tile tile)
+            void CheckStep(LinkedList<Tile> tilePath)
             {
-                if (checkedTiles.Contains(tile))
-                    return;
-                checkedTiles.Add(tile);
-                
-                List<Tile> newPath = path.ToList();
-                newPath.Add(tile);
-                
-                if (!tile.taken)
-                    options.Add(newPath);
-                else if (!tile.halt)
-                    foreach (Tile child in reversed ? tile.prevTiles : tile.nextTiles)
-                        CheckStep(newPath, child);
+                foreach (Tile option in tilePath.Last.Value.nextTiles)
+                {
+                    if (checkedTiles.Contains(option))
+                        return;
+                    
+                    if (!option.taken)
+                        options.Add(new LinkedList<Tile>().AddFirst(option).List);
+                    else
+                        CheckStep(tilePath.AddLast(option));
+                }
             }
-            foreach (Tile child in reversed ? currentTile.prevTiles : currentTile.nextTiles)
-                CheckStep(new List<Tile>(), child);
+            
+            
+            
+            // foreach (Tile option in currentTile.nextTiles)
+            // {
+            //     if (option == lastTile)
+            //         continue;
+            //     
+            //     if (!option.taken)
+            //         options.Add(new LinkedList<Tile>().AddFirst(option).List);
+            //     else
+            //     {
+            //         
+            //     }
+            // }
 
             switch (options.Count)
             {
                 case 0:
                     throw new Exception("No valid tiles to move to!");  // This should only happen if the board isn't well-defined
+                // break;
                 case 1:
                     nextTile = options[0];
                     break;
                 default:
-                    foreach (List<Tile> tile in options)
-                        tile.Last().Highlight(tile);
+                    foreach (LinkedList<Tile> tile in options)
+                        tile.Last.Value.Highlight(tile);
 
                     yield return new WaitWhile(() => nextTile is null);
 
-                    foreach (List<Tile> tile in options)
-                        tile.Last().Unhighlight();
+                    foreach (LinkedList<Tile> tile in options)
+                        tile.Last.Value.Unhighlight();
                     break;
             }
             
@@ -99,52 +107,57 @@ public class Pawn : MonoBehaviour
             step += nextTile.Count;
             
             lastTile = currentTile;
-            currentTile = nextTile.Last();
+            currentTile = nextTile.Last.Value;
             nextTile = null;
             lastTile.taken = false;
             currentTile.taken = true;
-            if (currentTile.colour == Tile.TileColour.Safe)
-                lastTile = null;  // So leaving the safe spot to the tile you came from is accepted
 
             if (currentTile.halt)
                 break;
-
-            if (currentTile.colour == Tile.TileColour.Rocket)
-            {
-                if (!exactEnding || step >= steps)
-                    yield return Win();
-                else
-                    reversed = true;
-            }
         }
     }
+
+    /*private IEnumerator MoveTo(Vector3 targetPos, float duration)
+    {
+        float timePassed = 0;
+        Vector3 begin = transform.position;
+        Vector3 direction = targetPos - begin;
+        while(timePassed < duration)
+        {
+            timePassed += Time.deltaTime;
+            transform.Translate(direction / duration * Time.deltaTime);
+            yield return null;
+        }
+        transform.position = targetPos;
+    }*/
 
     private IEnumerator MoveToNextTile()
     {
         int pathLength = nextTile.Count;
         
         if (pathLength == 1)
-            yield return MTTHop(nextTile[0].transform.position);
+            yield return MTTHop();
         else
         {
-            yield return MTTFirst(nextTile[0].transform.position);
+            yield return MTTFirst(nextTile.First.Value.transform.position);
 
-            for (int i = 1; i < pathLength - 1; i++)
-                yield return MTTMiddle(nextTile[i].transform.position);
+            for (LinkedListNode<Tile> tile = nextTile.First.Next; tile != nextTile.Last; tile = tile.Next)
+                yield return MTTMiddle(tile.Value.transform.position);
 
-            yield return MTTLast(nextTile[pathLength - 1].transform.position);
+            yield return MTTLast(nextTile.Last.Value.transform.position);
         }
     }
     
-    private IEnumerator MTTHop(Vector3 targetPos)
+    private IEnumerator MTTHop()
     {
         float timePassed = 0;
         Vector3 startPos = transform.position;
+        Vector3 targetPos = nextTile.Last.Value.transform.position;
         
         while (timePassed < moveDuration)
         {
             timePassed += Time.deltaTime;
-            transform.position = startPos + timePassed / moveDuration * (targetPos - startPos);
+            transform.position = startPos + timePassed * (targetPos - startPos);
             transform.Translate(0, -(2 * overtakeHeight / (moveDuration * moveDuration)) * (timePassed - moveDuration / 2) * (timePassed - moveDuration / 2) + overtakeHeight / 2, 0);
             yield return null;
         }
@@ -159,7 +172,7 @@ public class Pawn : MonoBehaviour
         while (timePassed < moveDuration)
         {
             timePassed += Time.deltaTime;
-            transform.position = startPos + timePassed / moveDuration * (targetPos - startPos);
+            transform.position = startPos + timePassed * (targetPos - startPos);
             transform.Translate(0, -(overtakeHeight/(moveDuration*moveDuration)) * (timePassed - moveDuration) * (timePassed - moveDuration) + overtakeHeight, 0);
             yield return null;
         }
@@ -175,7 +188,7 @@ public class Pawn : MonoBehaviour
         while (timePassed < moveDuration)
         {
             timePassed += Time.deltaTime;
-            transform.position = startPos + timePassed / moveDuration * (targetPos - startPos);
+            transform.position = startPos + timePassed * (targetPos - startPos);
             yield return null;
         }
         transform.position = targetPos;
@@ -184,22 +197,21 @@ public class Pawn : MonoBehaviour
     private IEnumerator MTTLast(Vector3 targetPos)
     {
         float timePassed = 0;
-        Vector3 startPos = transform.position - new Vector3(0, overtakeHeight, 0);
+        Vector3 startPos = transform.position;
 
         while (timePassed < moveDuration)
         {
             timePassed += Time.deltaTime;
-            transform.position = startPos + timePassed / moveDuration * (targetPos - startPos);
-            transform.Translate(0, -(overtakeHeight / (moveDuration * moveDuration)) * (timePassed * timePassed) + overtakeHeight, 0);
+            transform.position = startPos + timePassed * (targetPos - startPos);
+            transform.Translate(0, -(overtakeHeight / (moveDuration * moveDuration)) * (timePassed * timePassed), 0);
             yield return null;
         }
         transform.position = targetPos;
     }
 
-    private void RegisterTileChoice(List<Tile> tile)
+    private void RegisterTileChoice(LinkedList<Tile> tile)
     {
-        if (inPlay)
-            nextTile = tile;
+        nextTile = tile;
     }
 
     private void EjectPressed(Tile.TileColour tileColour)
@@ -222,11 +234,6 @@ public class Pawn : MonoBehaviour
         currentTile.taken = false;
         currentTile = tileZero;
         lastTile = tileZero;
-    }
-
-    private IEnumerator Win()
-    {
-        throw new NotImplementedException(name + " won!");
     }
 
     private void OnDestroy()

@@ -11,7 +11,9 @@ public class Tile : MonoBehaviour
     public TileColour colour;
     public bool halt = false;
     public Tile[] nextTiles;
+    [HideInInspector] public Tile[] prevTiles;  // For bouncing back, created based on nextTiles (if required)
     public bool clickable = false;
+    private List<Tile> currentPath;
 
     [CanBeNull] private ParticleSystem highlight;
     [CanBeNull] private ParticleSystem puff;
@@ -30,9 +32,10 @@ public class Tile : MonoBehaviour
         LaunchButton.OnTileEject += EjectPressed;
     }
 
-    public void Highlight()
+    public void Highlight(List<Tile> path)
     {
         clickable = true;
+        currentPath = path;
         highlight?.Play();
     }
 
@@ -42,12 +45,13 @@ public class Tile : MonoBehaviour
         highlight?.Stop();
     }
 
-    public static event Action<Tile> OnTileSelected; 
+    public static event Action<List<Tile>> OnTileSelected; 
     private void OnMouseDown()
     {
-        if (!clickable) return;
+        if (!clickable)
+            return;
 
-        OnTileSelected?.Invoke(this);
+        OnTileSelected?.Invoke(currentPath);
     }
 
     private void EjectPressed(TileColour tileColour)
